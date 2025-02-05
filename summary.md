@@ -541,4 +541,7 @@ logIncrementN x n = do
 - return `x >>= f` is equivalent to `f x`
 - `m >>= return` is equivalent to `m`
 - Asociativitatea: `(m >>= f)` >>= g is equivalent to `m >>= (\x -> f x >>= g)`
+
+[Examene rezolvate](https://github.com/eusebiuuu/functional_programming)
+
 ![Monad types](./images/monad_types.png)
