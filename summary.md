@@ -66,16 +66,19 @@ data TypenameClass = Cons_1 t11 . . . t1k1
 ## Records
 - Cu `type` / `newtype` se pot redenumi tipuri deja existente: `type FirstName = String`
 ```hs
+-- age, height si phoneNumber sunt field accessors, adica daca scriem, in exemplul de mai jos, `age presedinteDemn` obtinem 69
 data Person = Person {
     age :: Int,
     height :: Float,
     phoneNumber :: String
 }
 
-bobitza = { firstName = " Calin "
-, lastName= " Georgescu "
-, age = 30 , h e i g ht = 192.3
-, phoneNumber = " 0798765432 "
+presedinteDemn = {
+    firstName = " Calin ",
+    lastName = " Georgescu ",
+    age = 69,
+    height = 152.3,
+    phoneNumber = " 0798765432 "
 }
 ```
 
@@ -156,6 +159,7 @@ class Collection c where
     fromList :: Ord key => [(key,value)] -> c key value
 
 newtype PairList k v = PairList { getPairList :: [(k, v)] }
+-- definitie echivalenta, fara field accessor: PairList [(k, v)]
 
 instance Collection PairList where
     empty = PairList []
@@ -192,6 +196,7 @@ newtype Identity a = Identity a deriving Show
 instance Functor Identity where
     fmap f (Identity x) = Identity (f x)
 -- testare
+-- ca sa testati main-ul de mai jos, pur si simplu scrieti `main` in ghci dupa ce ati dat reload la fisier
 main :: IO ()
 main = do
     let idInt = Identity 42
@@ -220,7 +225,7 @@ instance Functor ((->) t) where
 -- Exemplu 1
 -- De asemenea, un lucru important este ca functorul definit de noi trebuie sa aiba tipul `* -> *`. Astfel, functorul se aplica pe ultimul tip din constructorul de tipuri:
 data Two a b = Two a b deriving Show
-instance Functor (Two a) where
+instance Functor (Two a) where -- observati ca nu avem Two a b; functia de aplica doar pe ultimul tip mereu, de unde si limitarea functorilor
     fmap f (Two x y) = Two x (f y)
 main :: IO ()
 main = do
@@ -260,6 +265,10 @@ main = do
     let new_bloor = fmap (++ " yoo") varB
     let str_to_print = fmap show new_bloor
     print str_to_print
+-- raspuns (nu te uita): pentru ca Bloor este de tipul Quant a String, iar,
+-- din instanta de mai sus a clasei Show a tipului `Quant a b`, tipul `a` din `Quant a String`
+-- trebuie sa fie afisabil, insa aici nu este definit
+-- deci, bagam la misto un tip afisabil, in cazul asta Int, si spunem explicit ce tip are toata variabila
 ```
 
 - Dar ce se intampla daca avem contexte imbricate (i.e. functori imbricati)?? Raspuns: vom folosi fmap-ul functorilor respectivi
@@ -270,7 +279,6 @@ data LiftItOut f a = LiftItOut (f a) deriving Show
 instance Functor f => Functor (LiftItOut f) where
     fmap g (LiftItOut fa) = LiftItOut (fmap g fa)
 
--- ca sa testati main-ul de mai jos, pur si simplu scrieti `main` in ghci dupa ce ati dat reload la fisier
 main :: IO ()
 main = do
     let wrappedValue = LiftItOut (Just 42)  -- LiftItOut (Maybe Int)
@@ -281,14 +289,14 @@ main = do
 data Parappa f g a = DaWrappa (f a) (g a) deriving Show
 instance (Functor f, Functor g) => Functor (Parappa f g) where
     fmap fct (DaWrappa fa ga) = DaWrappa (fmap fct fa) (fmap fct ga)
-    -- `fa` reprezinta (f a), adica rezultatul impachetarii unei variabile de tip a in functorul f (adica [], Just etc.)
+    -- `fa` reprezinta (f a), adica rezultatul impachetarii unei variabile de tip a in functorul f (adica [5, 6, 7], Just 8 etc.)
 
 main :: IO ()
 main = do
     let var = DaWrappa [5, 6] (Just 5)
     let res = fmap (+1) var
     let string_to_print = fmap show res
-    print string_to_print
+    print string_to_print -- [6, 7] (Just 6)
 
 -- Exemplul 3: testeaza-l ca mai sus !!!
 data Notorious g o a t = Notorious (g o) (g a) (g t)
@@ -318,7 +326,7 @@ main = do
     let var = Read dummy
     let new_var = fmap (* 2) var
     let str_to_print = show new_var
-    print str_to_print
+    print str_to_print -- afiseaza dublul lungimii lui "heey", adica 8
 
 ```
 

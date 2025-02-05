@@ -39,9 +39,30 @@ instance Functor TalkToMe where
     fmap f (Read g) = Read (f . g)
 dummy :: String -> Int
 dummy str = length (str)
+-- main :: IO ()
+-- main = do
+--     let var = Read dummy
+--     let new_var = fmap (* 2) var
+--     let str_to_print = show new_var
+--     print str_to_print
+
+
+
+data Quant a b = Finance | Desk a | Bloor b
+instance Functor (Quant a) where
+    fmap f Finance = Finance
+    fmap f (Desk x) = Desk x
+    fmap f (Bloor x) = Bloor (f x)
+
+instance (Show a, Show b) => Show (Quant a b) where
+    show (Bloor s) = "bloor " ++ show s
+    show (Desk n) = "desk " ++ show n
+    show (Finance) = "finance "
+
 main :: IO ()
 main = do
-    let var = Read dummy
-    let new_var = fmap (* 2) var
-    let str_to_print = show new_var
+    let varD = Desk 6
+    let varB = Bloor "hey" :: Quant [Four'' Int Float] String
+    let new_bloor = fmap (++ " yoo") varB
+    let str_to_print = fmap show new_bloor
     print str_to_print
