@@ -45,3 +45,16 @@ main = do
     let new_var = fmap (* 2) var
     let str_to_print = show new_var
     print str_to_print
+
+
+data Parappa f g a = DaWrappa (f a) (g a) deriving Show
+
+instance (Functor f, Functor g) => Functor (Parappa f g) where
+    fmap fct (DaWrappa f1 f2) = DaWrappa (fmap fct f1) (fmap fct f2)
+
+main2 :: IO ()
+main2 = do
+    let var = DaWrappa [5, 6] (6, 8)
+    let res = fmap (+1) var
+    let string_to_print = fmap show res
+    print string_to_print
