@@ -336,10 +336,10 @@ main = do
 
 ## Applicative functors
 - Functorii sunt chill, numai ca au 2 limitari:
-  - functiile nu se pot aplica repetat
+  - functiile nu se pot aplica repetat (pentru ca `f`-ul nu se afla intr-un context)
   - nu se pot aplica functii daca ele sunt deja intr-un context
 - Pentru asta vom folosi un functor aplicativ, care este un functor ca oricare altul numai ca are si o functie care ne permite sa aplicam in mod repetat functia la fiecare parametru al contextului
-- Ca sa realizeze asta avem nevoie de o functie numita aplicatie, care este notata `ap` sau, ca operator, `(<*>)` si o functie `pure`
+- Ca sa realizeze asta avem nevoie de o functie numita aplicatie (de unde si numele), care este notata `ap` sau, ca operator, `(<*>)` impreuna cu o functie `pure`
 
 ```hs
 class Functor m => Applicative m where
@@ -368,6 +368,7 @@ append (Cons x xs) ys = Cons x (append xs ys)
 instance Functor List where
     fmap f Nil = Nil
     fmap f (Cons a rest) = Cons (f a) (fmap f rest) -- un fmap banal :)
+
 instance Applicative List where
     pure x = Cons x Nil
     Nil <*> _ = Nil
@@ -399,7 +400,7 @@ data Cow = Cow {
     name :: String,
     age :: Int,
     weight :: Int
-} deriving (Eq, Show)
+} deriving (Eq, Show) -- echivalent cu a scrie `Cow String Int Int`, doar ca fara field accessors
 
 noEmpty :: String -> Maybe String
 noEmpty s = if length s > 0 then Just s else Nothing 
@@ -424,7 +425,7 @@ class Applicative m => Monad m where
     return :: a -> m a -- elementul neutru operatiei `(>>=)`, el imbraca o valoare de tipul `a` in contextul `m`
     (>>=)  :: m a -> (a -> m b) -> m b
     -- `m a` este tipul comenzilor care produc rezultate de tip a si au efecte laterale
-    -- `(a -> m b)` este tipul functiilor cu efecte laterale
+    -- `(a -> m b)` este tipul functiilor cu efecte laterale (efect lateral = se schimba contextul, din `a` devine `m b`)
     -- (>>=) este operatia de secventiere a comenzilor
 
     -- Optional: Un operator particular luat din `>>=` pentru cazurile in care nu ne este util rezultatul operatiei precedente (vezi exemplu mai jos)
@@ -454,8 +455,8 @@ ioNumber = do
   print noout
 
 ioNumber2 :: IO ()
--- ioNumber2 = readLn >>= (\num -> putStrLn ("Intrare\n" ++ show num) >> let root = prelNo num in putStrLn "Iesire" >> print root)
 ioNumber2 = readLn >>= (\num -> putStrLn ("Intrare\n" ++ show num) >>= (\_ -> let root = prelNo num in putStrLn "Iesire" >>= (\_ -> print root)))
+-- echivalent cu: ioNumber2 = readLn >>= (\num -> putStrLn ("Intrare\n" ++ show num) >> let root = prelNo num in putStrLn "Iesire" >> print root)
 
 -- Exemplul 3 (observati acel `do` de dupa clauza `else`)
 myGetLine :: IO String
@@ -521,6 +522,7 @@ logIncrement x = do
   tell (show x)
   return (x + 1)
 
+-- !!! observati acel do de dupa if si dupa else: sunt necesare atunci cand secventiem operatii; daca am fi avut doar return nu era necesar
 logIncrementN :: Int -> Int -> WriterS Int
 logIncrementN x n = do
   if n == 1 then do
