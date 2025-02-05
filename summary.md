@@ -532,6 +532,7 @@ logIncrementN x n = do
     new_x <- logIncrementN x (n - 1) -- extrage tuplul (Int, String) din monada, adica (\_(num, msg) -> ...)
     tell (show "increment" ++ show new_x ++ "\n") -- `tell` concateneaza mesajul la string-ul deja existent (se foloseste operatorul >>=)
     return (new_x + 1) -- se reintroduce in monada tuplul dupa ce a fost modificat numarul (operatorul >>= cu functia (+1) si Writer (new_val + 1, msg))
+    -- nu uitati!!! : intre liniile din cadrul unui `do` este de fapt operatorul (>>=)`
 
 -- Rezolvati ex 5 c) din lab 13
 ```
